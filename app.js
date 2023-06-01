@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 
 const libraryRoutes = require('./routes/library')
+const userRoutes = require('./routes/user')
 
 mongoose.connect('mongodb+srv://user1:user1@cluster1.kf2od4q.mongodb.net/?retryWrites=true&w=majority',
   {
@@ -23,5 +24,6 @@ app.use((req, res, next) => {
 app.use(express.json())
 
 app.use('/api/books', libraryRoutes)
+app.use('/api/auth', userRoutes)
 
 module.exports = app;
