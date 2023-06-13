@@ -16,4 +16,6 @@ router.put('/:id', auth, multer, libraryCtrl.modifyBook);
 
 router.delete('/:id', auth, libraryCtrl.deleteBook)
 
+router.post('/:id/rating', auth, libraryCtrl.rateBook)
+
 module.exports = router
