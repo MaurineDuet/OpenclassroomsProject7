@@ -89,20 +89,44 @@ exports.getAllBooks = (req, res, next) => {
 exports.rateBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
-      const newRating = {
-        userId: req.body.userId,
-        grade: req.body.rating
+      console.log(book)
+      if (book.userId !== req.auth.userId) {
+        const newRating = {
+          userId: req.body.userId,
+          grade: req.body.rating
+        }
+        book.ratings.push(newRating)
+
+        const totalRatings = book.ratings.length
+        const sumOfGrades = book.ratings.reduce((sum, rating) => sum + rating.grade, 0)
+
+        // Calculate the average rating
+        const newAverageRating = totalRatings > 0 ? sumOfGrades / totalRatings : 0
+
+        // Update the averageRating field in the book document
+        book.averageRating = newAverageRating
+        console.log(newAverageRating)
+
+        Book.updateOne(
+          { _id: req.params.id },
+          {
+            $set: {
+              averageRating: newAverageRating,
+              /* ratings: book.ratings */
+            }
+          }
+        )
+          .then(() => {
+           res.status(200).json({ message: 'Nouvelle moyenne calculée'}) })
+          .catch(error => res.status(401).json({ error }))
+
       }
-      book.ratings.push(newRating)
 
-      const totalRatings = book.ratings.length
-      const sumOfGrades = book.ratings.reduce((sum, rating) => sum + rating.grade, 0)
-
-      // Calculate the average rating
-      const averageRating = totalRatings > 0 ? sumOfGrades / totalRatings : 0
-
-      // Update the averageRating field in the book document
-      book.averageRating = averageRating
+      else {
+        res.status(401).json({ error: 'Unauthorized' });
+      }
 
     })
+
+    .catch(error => res.status(400).json({ error }))
 }
