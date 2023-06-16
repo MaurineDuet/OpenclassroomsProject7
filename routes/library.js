@@ -10,12 +10,14 @@ router.post('/', auth, multerMiddleware, libraryCtrl.createBook)
 
 router.get('/', libraryCtrl.getAllBooks);
 
-router.get('/:id', libraryCtrl.getOneBook);
+router.get('/:id', libraryCtrl.getOneBook, libraryCtrl.getBestRatedBooks);
 
 router.put('/:id', auth, multerMiddleware, libraryCtrl.modifyBook);
 
 router.delete('/:id', auth, libraryCtrl.deleteBook)
 
 router.post('/:id/rating', auth, libraryCtrl.rateBook)
+
+router.get('/bestrating', libraryCtrl.getBestRatedBooks)
 
 module.exports = router

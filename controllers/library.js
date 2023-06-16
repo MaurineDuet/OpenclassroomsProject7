@@ -74,10 +74,34 @@ exports.deleteBook = (req, res, next) => {
       .catch(error => res.status(400).json({ error })); */
 }
 
+exports.getBestRatedBooks = (req, res, next) => {
+  Book.find()
+    .then((books) => {
+      books.sort((a, b) => b.averageRating - a.averageRatingrating);
+
+      // Get the top three books
+      const bestRatedBooks = books.slice(0, 3);
+      console.log(bestRatedBooks)
+
+      res.status(200).json(bestRatedBooks)
+    })
+    .catch((error) => {
+      res.status(500).json({ error: 'An error occurred while retrieving books.' });
+    })
+}
+
 exports.getOneBook = (req, res, next) => {
-  Book.findOne({ _id: req.params.id })
-    .then(book => res.status(200).json(book))
-    .catch(error => res.status(404).json({ error }));
+  const { id } = req.params
+  if (id === 'bestrating') {
+    return exports.getBestRatedBooks(req, res, next)
+
+      // Return the best rated books in the response
+      res.status(200).json(bestRatedBooks);
+  } else {
+    Book.findOne({ _id: req.params.id })
+      .then(book => res.status(200).json(book))
+      .catch(error => res.status(404).json({ error }));
+  }
 }
 
 exports.getAllBooks = (req, res, next) => {
@@ -89,16 +113,16 @@ exports.getAllBooks = (req, res, next) => {
 exports.rateBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
-      console.log(book)
+      const newRatings = book.ratings
       if (book.userId !== req.auth.userId) {
         const newRating = {
           userId: req.body.userId,
           grade: req.body.rating
         }
-        book.ratings.push(newRating)
+        newRatings.push(newRating)
 
-        const totalRatings = book.ratings.length
-        const sumOfGrades = book.ratings.reduce((sum, rating) => sum + rating.grade, 0)
+        const totalRatings = newRatings.length
+        const sumOfGrades = newRatings.reduce((sum, rating) => sum + rating.grade, 0)
 
         // Calculate the average rating
         const newAverageRating = totalRatings > 0 ? sumOfGrades / totalRatings : 0
@@ -109,15 +133,20 @@ exports.rateBook = (req, res, next) => {
 
         Book.updateOne(
           { _id: req.params.id },
+
           {
-            $set: {
-              averageRating: newAverageRating,
-              /* ratings: book.ratings */
-            }
+            /* $set: */
+            ratings: newRatings,
+            averageRating: newAverageRating,
+            _id: req.params.id
+            /*  */
+
           }
         )
           .then(() => {
-           res.status(200).json({ message: 'Nouvelle moyenne calculée'}) })
+            console.log({ _id: req.params.id })
+            res.status(200).json({ message: 'Nouvelle moyenne calculée' })
+          })
           .catch(error => res.status(401).json({ error }))
 
       }
@@ -130,3 +159,4 @@ exports.rateBook = (req, res, next) => {
 
     .catch(error => res.status(400).json({ error }))
 }
+
