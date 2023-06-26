@@ -120,6 +120,8 @@ exports.rateBook = (req, res, next) => {
           grade: req.body.rating
         }
         newRatings.push(newRating)
+        console.log(newRating)
+        console.log(newRatings)
 
         const totalRatings = newRatings.length
         const sumOfGrades = newRatings.reduce((sum, rating) => sum + rating.grade, 0)
@@ -135,17 +137,17 @@ exports.rateBook = (req, res, next) => {
           { _id: req.params.id },
 
           {
-            /* $set: */
+            $set: {
             ratings: newRatings,
             averageRating: newAverageRating,
             _id: req.params.id
-            /*  */
+          }
 
           }
         )
           .then(() => {
             console.log({ _id: req.params.id })
-            res.status(200).json({ message: 'Nouvelle moyenne calculée' })
+            res.status(200).json({ _id: req.params.id, message: 'Nouvelle moyenne calculée' })
           })
           .catch(error => res.status(401).json({ error }))
 
