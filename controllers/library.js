@@ -147,7 +147,7 @@ exports.rateBook = (req, res, next) => {
         )
           .then(() => {
             console.log({ _id: req.params.id })
-            res.status(200).json({ _id: req.params.id, message: 'Nouvelle moyenne calculée' })
+            res.status(200).json({ _id: req.params.id, message: 'Nouvelle moyenne calculée', ...book._doc })
           })
           .catch(error => res.status(401).json({ error }))
 
