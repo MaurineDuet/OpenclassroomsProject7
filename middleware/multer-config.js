@@ -2,12 +2,14 @@ const multer = require('multer');
 const sharp = require('sharp');
 const fs = require('fs');
 
+//Format des images acceptées sur le site en upload par un utilisateur
 const MIME_TYPES = {
   'image/jpg': 'jpg',
   'image/jpeg': 'jpg',
   'image/png': 'png',
 };
 
+//Stockage d'une image dans le dossier images
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
     callback(null, 'images');
@@ -21,15 +23,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage }).single('image');
 
+//Compression de l'image pour alléger son poids
 const compressImage = async (file) => {
   try {
     const tempFilePath = `images/temp_${file.filename}`; // Temporary file path
     const compressedFilePath = `images/${file.filename}`; // Final compressed file path
 
-    // Compress the image to the temporary file
+    // Compression de l'image dans un fichier temporaire
     await sharp(file.path).webp({ quality: 20 }).toFile(tempFilePath);
 
-    // Replace the original file with the compressed one
+    // Remplace le fichier original par le fichier compressé
     fs.rename(tempFilePath, compressedFilePath, (error) => {
       if (error) {
         throw new Error('Image renaming failed: ' + error.message);
@@ -45,7 +48,7 @@ const compressImage = async (file) => {
   }
 };
 
-
+//Upload d'une image en ligne via multer
 const multerMiddleware = (req, res, next) => {
   upload(req, res, async (error) => {
     if (error) {
@@ -53,7 +56,6 @@ const multerMiddleware = (req, res, next) => {
     }
 
     if (req.file) {
-      // If a new image is provided, compress and update the req.file
       try {
         req.file = await compressImage(req.file);
       } catch (error) {

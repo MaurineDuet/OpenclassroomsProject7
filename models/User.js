@@ -6,6 +6,7 @@ const userSchema = mongoose.Schema({
   password: { type: String, required: true }
 })
 
+//Limite de la création d'un compte par adresse mail
 userSchema.plugin(uniqueValidator)
 
 module.exports = mongoose.model('User', userSchema)
